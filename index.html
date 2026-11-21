@@ -1855,7 +1855,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Reserve Founding Spot ($39)</button>
-                <p class="form-note">No charge on this step. Choose Instant Crypto Lock or Card / Business Invoice on Step 2.</p>
+                <p class="form-note">No charge on this step. Confirm your Card / Business Invoice request on Step 2.</p>
               </form>
             </div>
 
@@ -1866,8 +1866,8 @@
 
               <div class="reserved-summary" id="reserved-summary"></div>
 
-              <!-- Option 1: Crypto -->
-              <div class="payment-option">
+              <!-- Option 1: Crypto (temporarily hidden until wallet addresses are configured) -->
+              <div class="payment-option hidden" id="crypto-payment-option" aria-hidden="true">
                 <h4>Option 1: Instant Lock — USDC / USDT ($39)</h4>
                 <p>Send $39 USDC or USDT to lock your Founding seat immediately, then paste your transaction hash below.</p>
 
@@ -1895,11 +1895,11 @@
                 <div class="status-box" id="crypto-status"></div>
               </div>
 
-              <!-- Option 2: Card / Invoice -->
+              <!-- Card / Business Invoice -->
               <div class="payment-option">
-                <h4>Option 2: Card / Business Invoice — Zero-Crypto</h4>
-                <p>Prefer a standard corporate invoice or card checkout link for expense reimbursement? Lock your $39 rate now.</p>
-                <button type="button" class="btn btn-secondary" id="invoice-intent-btn" style="width: 100%;">I prefer Card / Invoice ($39) — lock my founding price</button>
+                <h4>Card / Business Invoice ($39)</h4>
+                <p>Lock your $39 Founding License rate now. We will email you a standard corporate invoice or card checkout link for expense reimbursement.</p>
+                <button type="button" class="btn btn-primary" id="invoice-intent-btn" style="width: 100%;">Card / Business Invoice ($39) — lock my founding price</button>
                 <div class="status-box" id="invoice-status"></div>
               </div>
             </div>
