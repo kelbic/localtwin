@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LocalTwin — 100% Offline Synthetic Data Twins for NDA-Locked Files</title>
+  <meta name="description" content="Use Claude & ChatGPT on NDA-locked Excel, CSV, DOCX, and PDF files without raw client data ever leaving your laptop. Zero network calls. Runs in Airplane Mode." />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-subtle: #f6f7f9;
+      --bg-card: #ffffff;
+      --graphite-950: #0f1115;
+      --graphite-900: #16191f;
+      --graphite-800: #222730;
+      --graphite-700: #343b46;
+      --graphite-600: #4b5563;
+      --graphite-500: #6b7280;
+      --border: #d8dde6;
+      --border-strong: #b9c2cf;
+      --border-dark: #2c3340;
+      --text: #111418;
+      --text-muted: #4b5563;
+      --text-on-dark: #f3f5f8;
+      --text-on-dark-muted: #a6b0bf;
+      --red-bg: #fef2f2;
+      --red-border: #f5c2c7;
+      --red-text: #991b1b;
+      --green-bg: #ecfdf5;
+      --green-border: #a7f3d0;
+      --green-text: #065f46;
+      --green-accent: #10b981;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+      --amber-text: #92400e;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --radius: 6px;
+      --radius-sm: 4px;
+      --max-w: 1120px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button, input {
+      font-family: inherit;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(6px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      color: var(--graphite-950);
+    }
+
+    .brand-mark {
+      width: 24px;
+      height: 24px;
+      background: var(--graphite-950);
+      color: #ffffff;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .brand-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border: 1px solid var(--border-strong);
+      border-radius: 3px;
+      color: var(--graphite-700);
+      background: var(--bg-subtle);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--graphite-600);
+    }
+
+    .nav-links a:hover {
+      color: var(--graphite-950);
+    }
+
+    .header-cta {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      background: var(--graphite-950);
+      color: #ffffff;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--graphite-950);
+      white-space: nowrap;
+    }
+
+    .header-cta:hover {
+      background: var(--graphite-800);
+    }
+
+    /* Section base */
+    section {
+      padding: 72px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section.section-dark {
+      background: var(--graphite-950);
+      color: var(--text-on-dark);
+      border-bottom-color: var(--border-dark);
+    }
+
+    section.section-subtle {
+      background: var(--bg-subtle);
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--graphite-500);
+      margin-bottom: 10px;
+    }
+
+    .section-dark .section-eyebrow {
+      color: var(--text-on-dark-muted);
+    }
+
+    .section-title {
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin: 0 0 32px;
+      max-width: 720px;
+    }
+
+    .section-dark .section-subtitle {
+      color: var(--text-on-dark-muted);
+    }
+
+    /* 1. Hero */
+    .hero {
+      padding: 76px 0 68px;
+      background: var(--bg);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--graphite-900);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      margin-bottom: 24px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-text);
+      flex-shrink: 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 4.6vw, 52px);
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+      margin: 0 0 20px;
+      max-width: 920px;
+      color: var(--graphite-950);
+    }
+
+    .hero h2 {
+      font-size: clamp(17px, 2vw, 20px);
+      line-height: 1.5;
+      font-weight: 400;
+      color: var(--graphite-600);
+      margin: 0 0 32px;
+      max-width: 820px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 13px 22px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    }
+
+    .btn-primary {
+      background: var(--graphite-950);
+      color: #ffffff;
+      border-color: var(--graphite-950);
+    }
+
+    .btn-primary:hover {
+      background: var(--graphite-800);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--graphite-950);
+      border-color: var(--border-strong);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-subtle);
+      border-color: var(--graphite-700);
+    }
+
+    .btn-green {
+      background: var(--green-text);
+      color: #ffffff;
+      border-color: var(--green-text);
+    }
+
+    .btn-green:hover {
+      background: #044e3b;
+    }
+
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: 13px;
+    }
+
+    .hero-caption {
+      font-size: 14px;
+      color: var(--graphite-500);
+      margin: 0;
+    }
+
+    /* 2. Interactive Demo */
+    .demo-shell {
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .demo-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--graphite-950);
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .demo-tab-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--text-on-dark-muted);
+      padding: 16px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .demo-tab-btn + .demo-tab-btn {
+      border-left: 1px solid var(--border-dark);
+    }
+
+    .demo-tab-btn:hover {
+      color: #ffffff;
+      background: var(--graphite-900);
+    }
+
+    .demo-tab-btn.active {
+      color: #ffffff;
+      background: var(--graphite-800);
+      border-bottom-color: var(--green-accent);
+    }
+
+    .tab-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 7px;
+      border-radius: 3px;
+      background: var(--graphite-950);
+      border: 1px solid var(--graphite-700);
+      color: var(--text-on-dark-muted);
+    }
+
+    .demo-tab-btn.active .tab-pill {
+      color: #d1fae5;
+      border-color: var(--green-text);
+    }
+
+    .demo-steps-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 13px 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--graphite-600);
+      cursor: pointer;
+      text-align: left;
+      border-bottom: 2px solid transparent;
+    }
+
+    .step-btn + .step-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .step-btn:hover {
+      background: #eef1f5;
+      color: var(--graphite-950);
+    }
+
+    .step-btn.active {
+      background: #ffffff;
+      color: var(--graphite-950);
+      border-bottom-color: var(--graphite-950);
+    }
+
+    .demo-body {
+      padding: 24px;
+    }
+
+    .demo-panel {
+      display: none;
+    }
+
+    .demo-panel.active {
+      display: block;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+    }
+
+    .badge-red {
+      background: var(--red-bg);
+      color: var(--red-text);
+      border-color: var(--red-border);
+    }
+
+    .badge-green {
+      background: var(--green-bg);
+      color: var(--green-text);
+      border-color: var(--green-border);
+    }
+
+    .badge-neutral {
+      background: var(--bg-subtle);
+      color: var(--graphite-700);
+      border-color: var(--border);
+    }
+
+    /* Data sheet tables */
+    .sheet-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--graphite-700);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      padding: 7px 12px;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      margin-bottom: 18px;
+    }
+
+    .table-wrap:last-child {
+      margin-bottom: 0;
+    }
+
+    .sheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      min-width: 680px;
+    }
+
+    .sheet-table th,
+    .sheet-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .sheet-table th:last-child,
+    .sheet-table td:last-child {
+      border-right: none;
+    }
+
+    .sheet-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .sheet-table th {
+      background: #f1f3f6;
+      color: var(--graphite-700);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .cell-sensitive {
+      background: var(--red-bg);
+      color: var(--red-text);
+      font-weight: 600;
+    }
+
+    .cell-synthetic {
+      background: var(--green-bg);
+      color: var(--green-text);
+      font-weight: 600;
+    }
+
+    .cell-formula {
+      color: var(--graphite-800);
+      background: #fafafa;
+    }
+
+    /* Step 3 Split restore view */
+    .restore-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .output-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .output-box.restored-box {
+      background: #ffffff;
+      border-color: var(--green-border);
+    }
+
+    .output-box-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #eef1f5;
+      color: var(--graphite-800);
+    }
+
+    .output-box.restored-box .output-box-header {
+      background: var(--green-bg);
+      border-bottom-color: var(--green-border);
+      color: var(--green-text);
+    }
+
+    .output-box-body {
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.65;
+      flex: 1;
+      color: var(--graphite-900);
+    }
+
+    .output-box-footer {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--graphite-600);
+      background: var(--bg-subtle);
+    }
+
+    .output-box.restored-box .output-box-footer {
+      background: var(--green-bg);
+      border-top-color: var(--green-border);
+      color: var(--green-text);
+      font-weight: 600;
+    }
+
+    .restore-action-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .restore-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--graphite-500);
+      text-align: center;
+    }
+
+    .tok-syn {
+      background: #e5e7eb;
+      color: var(--graphite-950);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .tok-real {
+      background: var(--green-bg);
+      color: var(--green-text);
+      border: 1px solid var(--green-border);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .tok-raw {
+      background: var(--red-bg);
+      color: var(--red-text);
+      border: 1px solid var(--red-border);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .tok-keep {
+      background: #eef2f6;
+      color: var(--graphite-800);
+      border: 1px dashed var(--border-strong);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* DOCX Demo Layout */
+    .doc-split {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .doc-paper {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+    }
+
+    .doc-paper-bar {
+      padding: 9px 14px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--graphite-700);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .doc-paper-content {
+      padding: 18px;
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: var(--graphite-900);
+    }
+
+    .hitl-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+    }
+
+    .hitl-header {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--graphite-800);
+    }
+
+    .hitl-list {
+      list-style: none;
+      margin: 0;
+      padding: 8px 12px;
+    }
+
+    .hitl-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .hitl-item:last-child {
+      border-bottom: none;
+    }
+
+    .hitl-item input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--graphite-950);
+      cursor: pointer;
+    }
+
+    .hitl-entity {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      display: block;
+      color: var(--graphite-950);
+      font-weight: 600;
+    }
+
+    .hitl-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--graphite-600);
+    }
+
+    .demo-step-nav {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .demo-step-hint {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--graphite-500);
+    }
+
+    /* 3. Cards grid */
+    .cards-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .section-dark .card {
+      background: var(--graphite-900);
+      border-color: var(--border-dark);
+    }
+
+    .card-index {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--graphite-500);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-dark .card-index {
+      color: var(--green-accent);
+    }
+
+    .card h3 {
+      font-size: 18px;
+      line-height: 1.3;
+      margin: 0 0 10px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .section-dark .card p {
+      color: var(--text-on-dark-muted);
+    }
+
+    .card-code {
+      margin-top: 14px;
+      padding: 10px 12px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--graphite-800);
+      overflow-x: auto;
+    }
+
+    /* 4. Comparison Table */
+    .comp-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+      font-size: 14px;
+    }
+
+    .comp-table th,
+    .comp-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .comp-table th:last-child,
+    .comp-table td:last-child {
+      border-right: none;
+    }
+
+    .comp-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comp-table th {
+      background: var(--bg-subtle);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--graphite-900);
+    }
+
+    .comp-table th.col-localtwin {
+      background: var(--graphite-950);
+      color: #ffffff;
+    }
+
+    .comp-table td.col-criterion {
+      font-weight: 600;
+      color: var(--graphite-950);
+      width: 22%;
+      background: #fafbfc;
+    }
+
+    .comp-table td.col-localtwin {
+      background: #f3faf7;
+      color: var(--graphite-950);
+      font-weight: 600;
+    }
+
+    .comp-bad {
+      color: var(--red-text);
+      font-weight: 600;
+    }
+
+    .comp-warn {
+      color: var(--amber-text);
+      font-weight: 600;
+    }
+
+    .comp-good {
+      color: var(--green-text);
+      font-weight: 700;
+    }
+
+    .quote-callout {
+      margin-top: 24px;
+      padding: 20px 24px;
+      border-left: 4px solid var(--graphite-950);
+      background: var(--bg-subtle);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--graphite-950);
+    }
+
+    /* 6. Founding Batch & 2-step form */
+    .founding-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .offer-card {
+      background: var(--graphite-950);
+      color: var(--text-on-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .spots-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 3px;
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #fcd34d;
+      margin-bottom: 16px;
+    }
+
+    .offer-title {
+      font-size: 26px;
+      line-height: 1.2;
+      font-weight: 800;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .offer-strike {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-on-dark-muted);
+      text-decoration: line-through;
+      margin: 0 0 22px;
+    }
+
+    .offer-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid var(--border-dark);
+    }
+
+    .offer-list li {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border-dark);
+      font-size: 14.5px;
+      color: #e5e7eb;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .offer-list li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .check-mark {
+      font-family: var(--font-mono);
+      color: var(--green-accent);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .form-card {
+      background: #ffffff;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .form-step-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--graphite-500);
+      margin-bottom: 6px;
+    }
+
+    .form-card h3 {
+      margin: 0 0 18px;
+      font-size: 20px;
+      letter-spacing: -0.015em;
+    }
+
+    .field-group {
+      margin-bottom: 18px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--graphite-900);
+      margin-bottom: 8px;
+    }
+
+    .required-star {
+      color: var(--red-text);
+    }
+
+    .radio-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 14px;
+      background: var(--bg-subtle);
+    }
+
+    .radio-option:hover {
+      border-color: var(--graphite-700);
+    }
+
+    .radio-option input[type="radio"] {
+      accent-color: var(--graphite-950);
+      margin: 0;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 11px 12px;
+      font-size: 14.5px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--graphite-950);
+      background: #ffffff;
+    }
+
+    .text-input:focus {
+      outline: 2px solid var(--graphite-950);
+      outline-offset: -1px;
+      border-color: var(--graphite-950);
+    }
+
+    .form-error {
+      display: none;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+      background: var(--red-bg);
+      color: var(--red-text);
+      border: 1px solid var(--red-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .form-error.visible {
+      display: block;
+    }
+
+    .form-note {
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: var(--graphite-500);
+    }
+
+    /* Step 2 payment options */
+    .payment-option {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 16px;
+      background: var(--bg-subtle);
+    }
+
+    .payment-option:last-child {
+      margin-bottom: 0;
+    }
+
+    .payment-option h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: var(--graphite-950);
+    }
+
+    .payment-option p {
+      margin: 0 0 12px;
+      font-size: 13.5px;
+      color: var(--graphite-600);
+    }
+
+    .wallet-row {
+      margin-bottom: 10px;
+    }
+
+    .wallet-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--graphite-600);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .wallet-copy-box {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .wallet-addr {
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 8px 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--graphite-900);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .tx-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .status-box {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      color: var(--green-text);
+      font-weight: 500;
+    }
+
+    .status-box.visible {
+      display: block;
+    }
+
+    .reserved-summary {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 10px 12px;
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      color: var(--green-text);
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Footer */
+    footer {
+      padding: 32px 0;
+      background: var(--bg);
+      color: var(--graphite-500);
+      font-size: 13px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .cards-3 {
+        grid-template-columns: 1fr;
+      }
+      .founding-grid {
+        grid-template-columns: 1fr;
+      }
+      .restore-grid {
+        grid-template-columns: 1fr;
+      }
+      .restore-action-col {
+        flex-direction: row;
+        justify-content: flex-start;
+      }
+      .doc-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      section {
+        padding: 52px 0;
+      }
+      .hero {
+        padding: 52px 0 48px;
+      }
+      .nav-links {
+        display: none;
+      }
+      .demo-tabs {
+        grid-template-columns: 1fr;
+      }
+      .demo-tab-btn + .demo-tab-btn {
+        border-left: none;
+        border-top: 1px solid var(--border-dark);
+      }
+      .demo-steps-bar {
+        grid-template-columns: 1fr;
+      }
+      .step-btn + .step-btn {
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+      .demo-body {
+        padding: 16px;
+      }
+      .tx-row {
+        flex-direction: column;
+      }
+      .wallet-copy-box {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#top" class="brand">
+        <span class="brand-mark">LT</span>
+        <span>LocalTwin</span>
+        <span class="brand-tag">OFFLINE v1</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#demo">Interactive Demo</a>
+        <a href="#why-naive-fails">How It Works</a>
+        <a href="#comparison">Comparison</a>
+        <a href="#zero-network">Zero-Network Proof</a>
+      </nav>
+      <a href="#founding" class="header-cta">Claim Founding Spot — $39</a>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- 1. HERO -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>100% OFFLINE DESKTOP APP · ZERO NETWORK CALLS · RUNS IN AIRPLANE MODE</span>
+        </div>
+        <h1>Use Claude &amp; ChatGPT on NDA-locked files — without raw client data ever leaving your laptop.</h1>
+        <h2>Replace client names, IBANs, amounts, and IDs with structurally valid synthetic twins locally. Keep every Excel formula and contract cross-reference intact — then restore real values in 1 click.</h2>
+        <div class="hero-actions">
+          <a href="#founding" class="btn btn-primary">Claim 1 of 5 Founding Spots — $39</a>
+          <a href="#demo" class="btn btn-secondary">Try Interactive Demo ↓</a>
+        </div>
+        <p class="hero-caption">Built for solo attorneys, boutique CPAs, and independent analysts under strict NDA.</p>
+      </div>
+    </section>
+
+    <!-- 2. INTERACTIVE A/B DEMO -->
+    <section id="demo" class="section-subtle">
+      <div class="container">
+        <div class="section-eyebrow">Interactive Local Pipeline Demo</div>
+        <h2 class="section-title">Inspect what leaves your laptop — and what never does.</h2>
+        <p class="section-subtitle">Switch between a multi-sheet financial workbook and an 18-page legal contract. Step through raw detection, structurally valid synthetic twins, and 1-click local restoration.</p>
+
+        <div class="demo-shell">
+          <!-- Main A/B Tabs -->
+          <div class="demo-tabs" role="tablist" aria-label="Document format demo">
+            <button type="button" class="demo-tab-btn active" role="tab" aria-selected="true" data-tab="excel" id="tab-btn-excel">
+              <span>Financial Excel / CSV (Multi-sheet)</span>
+              <span class="tab-pill">.XLSX / .CSV</span>
+            </button>
+            <button type="button" class="demo-tab-btn" role="tab" aria-selected="false" data-tab="docx" id="tab-btn-docx">
+              <span>Legal Contract / Memo (DOCX / PDF)</span>
+              <span class="tab-pill">.DOCX / .PDF</span>
+            </button>
+          </div>
+
+          <!-- ==================== TAB A: EXCEL / CSV ==================== -->
+          <div id="tab-panel-excel" data-tab-panel="excel">
+            <div class="demo-steps-bar" role="tablist" aria-label="Excel workflow steps">
+              <button type="button" class="step-btn active" data-demo="excel" data-step="1">1. Raw Client File</button>
+              <button type="button" class="step-btn" data-demo="excel" data-step="2">2. Synthetic Twin (Safe for LLM)</button>
+              <button type="button" class="step-btn" data-demo="excel" data-step="3">3. Re-mapped LLM Output</button>
+            </div>
+
+            <div class="demo-body">
+              <!-- Excel Step 1 -->
+              <div class="demo-panel active" data-demo-panel="excel" data-step-panel="1">
+                <div class="badge-row">
+                  <span class="badge badge-red">4 sensitive fields detected</span>
+                  <span class="badge badge-neutral">Linked tabs: Invoices + Bank + Ledger</span>
+                  <span class="badge badge-neutral">Local scan · 0 packets sent</span>
+                </div>
+
+                <div class="sheet-label">
+                  <span>Sheet 1: Invoices</span>
+                  <span>Status: RAW (NDA-LOCKED)</span>
+                </div>
+                <div class="table-wrap">
+                  <table class="sheet-table">
+                    <thead>
+                      <tr>
+                        <th>A · Invoice ID</th>
+                        <th>B · Counterparty</th>
+                        <th>C · IBAN</th>
+                        <th>D · Net Amount</th>
+                        <th>E · Ledger Check (Formula)</th>
+                        <th>F · Ratio</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="cell-sensitive">INV-2026-0412</td>
+                        <td class="cell-sensitive">Acme Holdings GmbH</td>
+                        <td class="cell-sensitive">DE89 3704 0044 0532 0130 00</td>
+                        <td class="cell-sensitive">€142,500.00</td>
+                        <td class="cell-formula">=SUMIFS(Ledger!D:D, Ledger!B:B, A2)</td>
+                        <td>Margin: 24.0%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="sheet-label">
+                  <span>Sheet 2: Bank</span>
+                  <span>Cross-referenced by Invoice ID &amp; IBAN</span>
+                </div>
+                <div class="table-wrap">
+                  <table class="sheet-table">
+                    <thead>
+                      <tr>
+                        <th>Ref ID</th>
+                        <th>Beneficiary</th>
+                        <th>Account IBAN</th>
+                        <th>Settled Amount</th>
+                        <th>Variance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="cell-sensitive">INV-2026-0412</td>
+                        <td class="cell-sensitive">Acme Holdings GmbH</td>
+                        <td class="cell-sensitive">DE89 3704 0044 0532 0130 00</td>
+                        <td class="cell-sensitive">€122,500.00</td>
+                        <td>€20,000.00</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="demo-step-nav">
+                  <span class="demo-step-hint">Raw data stays exclusively on disk. Generate a synthetic twin next.</span>
+                  <button type="button" class="btn btn-primary btn-sm" data-goto-demo="excel" data-goto-step="2">Generate Synthetic Twin →</button>
+                </div>
+              </div>
+
+              <!-- Excel Step 2 -->
+              <div class="demo-panel" data-demo-panel="excel" data-step-panel="2">
+                <div class="badge-row">
+                  <span class="badge badge-green">Valid MOD-97 IBAN</span>
+                  <span class="badge badge-green">Exact 1.20x scale</span>
+                  <span class="badge badge-green">Cross-sheet IDs linked</span>
+                  <span class="badge badge-green">0 broken formulas</span>
+                </div>
+
+                <div class="sheet-label">
+                  <span>Sheet 1: Invoices (Synthetic Twin)</span>
+                  <span>SAFE TO UPLOAD TO CLAUDE / CHATGPT</span>
+                </div>
+                <div class="table-wrap">
+                  <table class="sheet-table">
+                    <thead>
+                      <tr>
+                        <th>A · Invoice ID</th>
+                        <th>B · Counterparty</th>
+                        <th>C · IBAN</th>
+                        <th>D · Net Amount</th>
+                        <th>E · Ledger Check (Formula)</th>
+                        <th>F · Ratio</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="cell-synthetic">INV-2026-8831</td>
+                        <td class="cell-synthetic">Nordic Craft GmbH</td>
+                        <td class="cell-synthetic">DE44 5001 0517 5407 3249 31</td>
+                        <td class="cell-synthetic">€171,000.00</td>
+                        <td class="cell-formula">=SUMIFS(Ledger!D:D, Ledger!B:B, A2)</td>
+                        <td>Margin: 24.0%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="sheet-label">
+                  <span>Sheet 2: Bank (Synthetic Twin)</span>
+                  <span>Every cross-sheet reference remapped deterministically</span>
+                </div>
+                <div class="table-wrap">
+                  <table class="sheet-table">
+                    <thead>
+                      <tr>
+                        <th>Ref ID</th>
+                        <th>Beneficiary</th>
+                        <th>Account IBAN</th>
+                        <th>Settled Amount</th>
+                        <th>Variance (×1.20)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="cell-synthetic">INV-2026-8831</td>
+                        <td class="cell-synthetic">Nordic Craft GmbH</td>
+                        <td class="cell-synthetic">DE44 5001 0517 5407 3249 31</td>
+                        <td class="cell-synthetic">€147,000.00</td>
+                        <td>€24,000.00</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="demo-step-nav">
+                  <span class="demo-step-hint">Exact ratios (24.0% margin) and Excel formulas remain intact for LLM analysis.</span>
+                  <button type="button" class="btn btn-primary btn-sm" data-goto-demo="excel" data-goto-step="3">See Re-mapped LLM Output →</button>
+                </div>
+              </div>
+
+              <!-- Excel Step 3 -->
+              <div class="demo-panel" data-demo-panel="excel" data-step-panel="3">
+                <div class="badge-row">
+                  <span class="badge badge-green">Amounts auto-rescaled (÷1.20) &amp; entities restored locally</span>
+                  <span class="badge badge-neutral">Zero cloud roundtrip</span>
+                </div>
+
+                <div class="restore-grid">
+                  <div class="output-box">
+                    <div class="output-box-header">
+                      <span>Claude Output (on Synthetic Twin)</span>
+                      <span>INPUT</span>
+                    </div>
+                    <div class="output-box-body">
+                      <strong>Reconciliation Finding:</strong><br />
+                      <span class="tok-syn">Nordic Craft GmbH</span> (<span class="tok-syn">INV-2026-8831</span>) shows a <span class="tok-syn">€24,000</span> variance between the booked invoice (<span class="tok-syn">€171,000.00</span>) and the settled bank wire on IBAN <span class="tok-syn">DE44 5001 0517 5407 3249 31</span>. Gross margin remains steady at 24.0%; recommend requesting remittance advice for the unpaid tranche.
+                    </div>
+                    <div class="output-box-footer">Paste LLM response into LocalTwin</div>
+                  </div>
+
+                  <div class="restore-action-col">
+                    <button type="button" class="btn btn-green btn-sm" id="excel-restore-btn">Restore Real Values</button>
+                    <span class="restore-meta" id="excel-restore-meta">1-click local remap</span>
+                  </div>
+
+                  <div class="output-box restored-box" id="excel-restored-box">
+                    <div class="output-box-header">
+                      <span>Restored Output (Client-Ready)</span>
+                      <span id="excel-restored-state">RESTORED</span>
+                    </div>
+                    <div class="output-box-body" id="excel-restored-body">
+                      <strong>Reconciliation Finding:</strong><br />
+                      <span class="tok-real">Acme Holdings GmbH</span> (<span class="tok-real">INV-2026-0412</span>) shows a <span class="tok-real">€20,000</span> variance between the booked invoice (<span class="tok-real">€142,500.00</span>) and the settled bank wire on IBAN <span class="tok-real">DE89 3704 0044 0532 0130 00</span>. Gross margin remains steady at 24.0%; recommend requesting remittance advice for the unpaid tranche.
+                    </div>
+                    <div class="output-box-footer">Amounts auto-rescaled (÷1.20) &amp; entities restored locally</div>
+                  </div>
+                </div>
+
+                <div class="demo-step-nav">
+                  <span class="demo-step-hint">Click "Restore Real Values" to toggle synthetic vs. locally restored output.</span>
+                  <button type="button" class="btn btn-secondary btn-sm" data-switch-tab="docx">Try Legal Contract Demo →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== TAB B: LEGAL CONTRACT / MEMO ==================== -->
+          <div id="tab-panel-docx" data-tab-panel="docx" class="hidden">
+            <div class="demo-steps-bar" role="tablist" aria-label="Contract workflow steps">
+              <button type="button" class="step-btn active" data-demo="docx" data-step="1">1. Raw Client File</button>
+              <button type="button" class="step-btn" data-demo="docx" data-step="2">2. Synthetic Twin (Safe for LLM)</button>
+              <button type="button" class="step-btn" data-demo="docx" data-step="3">3. Re-mapped LLM Output</button>
+            </div>
+
+            <div class="demo-body">
+              <!-- DOCX Step 1 -->
+              <div class="demo-panel active" data-demo-panel="docx" data-step-panel="1">
+                <div class="badge-row">
+                  <span class="badge badge-red">5 entities detected across 18 pages</span>
+                  <span class="badge badge-neutral">Human-in-the-loop review before export</span>
+                </div>
+
+                <div class="doc-split">
+                  <div class="doc-paper">
+                    <div class="doc-paper-bar">
+                      <span>MSA_ApexMedical_Final_v3.docx · Section 4.2</span>
+                      <span>RAW</span>
+                    </div>
+                    <div class="doc-paper-content">
+                      <strong>4.2 Payment &amp; Venue.</strong> <span class="tok-raw">Apex Medical LLC</span> ('Client'), represented by <span class="tok-raw">Dr. Sarah Jenkins</span>, agrees to pay <span class="tok-raw">$480,000</span> by <span class="tok-raw">March 15, 2026</span>, governed by <span class="tok-keep">Massachusetts law</span> (<span class="tok-raw">Boston, MA</span>), with late balances accruing statutory interest after 15 business days.
+                    </div>
+                  </div>
+
+                  <div class="hitl-panel">
+                    <div class="hitl-header">Human-in-the-Loop Entity Checklist</div>
+                    <ul class="hitl-list">
+                      <li class="hitl-item">
+                        <input type="checkbox" checked data-entity-key="org" id="chk-org" />
+                        <label for="chk-org">
+                          <span class="hitl-entity">Apex Medical LLC → Crestline Bio LLC</span>
+                          <span class="hitl-meta">ORG · 27 occurrences across 18 pages</span>
+                        </label>
+                      </li>
+                      <li class="hitl-item">
+                        <input type="checkbox" checked data-entity-key="person" id="chk-person" />
+                        <label for="chk-person">
+                          <span class="hitl-entity">Dr. Sarah Jenkins → Dr. Hannah Brooks</span>
+                          <span class="hitl-meta">PERSON · 9 occurrences across 18 pages</span>
+                        </label>
+                      </li>
+                      <li class="hitl-item">
+                        <input type="checkbox" checked data-entity-key="amount" id="chk-amount" />
+                        <label for="chk-amount">
+                          <span class="hitl-entity">$480,000 → $576,000 (×1.20)</span>
+                          <span class="hitl-meta">MONEY · Uniform scale preserved</span>
+                        </label>
+                      </li>
+                      <li class="hitl-item">
+                        <input type="checkbox" checked data-entity-key="date" id="chk-date" />
+                        <label for="chk-date">
+                          <span class="hitl-entity">March 15, 2026 → April 24, 2026 (+40d)</span>
+                          <span class="hitl-meta">DATE · Consistent +40 day shift</span>
+                        </label>
+                      </li>
+                      <li class="hitl-item">
+                        <input type="checkbox" checked data-entity-key="city" id="chk-city" />
+                        <label for="chk-city">
+                          <span class="hitl-entity">Boston, MA → Denver, CO</span>
+                          <span class="hitl-meta">CITY · Venue location masked</span>
+                        </label>
+                      </li>
+                      <li class="hitl-item">
+                        <input type="checkbox" disabled id="chk-law" />
+                        <label for="chk-law">
+                          <span class="hitl-entity">Massachusetts law (Protected)</span>
+                          <span class="hitl-meta">JURISDICTION · Kept intact for legal accuracy</span>
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="demo-step-nav">
+                  <span class="demo-step-hint">Uncheck any entity to keep it untouched. Governing law stays intact by default.</span>
+                  <button type="button" class="btn btn-primary btn-sm" data-goto-demo="docx" data-goto-step="2">Generate Synthetic Twin →</button>
+                </div>
+              </div>
+
+              <!-- DOCX Step 2 -->
+              <div class="demo-panel" data-demo-panel="docx" data-step-panel="2">
+                <div class="badge-row">
+                  <span class="badge badge-green">Jurisdiction preserved intact</span>
+                  <span class="badge badge-green">Consistent entities across 18 pages</span>
+                  <span class="badge badge-green">Consistent date shift (+40d)</span>
+                </div>
+
+                <div class="doc-paper">
+                  <div class="doc-paper-bar">
+                    <span>MSA_CrestlineBio_Twin.docx · Section 4.2</span>
+                    <span>SAFE FOR LLM</span>
+                  </div>
+                  <div class="doc-paper-content" id="docx-step2-text">
+                    <strong>4.2 Payment &amp; Venue.</strong> <span class="tok-real">Crestline Bio LLC</span> ('Client'), represented by <span class="tok-real">Dr. Hannah Brooks</span>, agrees to pay <span class="tok-real">$576,000</span> by <span class="tok-real">April 24, 2026</span>, governed by <span class="tok-keep">Massachusetts law</span> (<span class="tok-real">Denver, CO</span>), with late balances accruing statutory interest after 15 business days.
+                  </div>
+                </div>
+
+                <div class="demo-step-nav">
+                  <span class="demo-step-hint">Because Massachusetts law is intact, Claude applies the right statutory cap while seeing zero real PII.</span>
+                  <button type="button" class="btn btn-primary btn-sm" data-goto-demo="docx" data-goto-step="3">See Re-mapped LLM Output →</button>
+                </div>
+              </div>
+
+              <!-- DOCX Step 3 -->
+              <div class="demo-panel" data-demo-panel="docx" data-step-panel="3">
+                <div class="badge-row">
+                  <span class="badge badge-green">1-click local restore · Ready to send to client</span>
+                  <span class="badge badge-neutral">Amounts ÷1.20 · Dates -40d</span>
+                </div>
+
+                <div class="restore-grid">
+                  <div class="output-box">
+                    <div class="output-box-header">
+                      <span>Claude Redline (Clause 4.2 · Synthetic)</span>
+                      <span>INPUT</span>
+                    </div>
+                    <div class="output-box-body">
+                      <strong>Proposed Clause 4.2 Revision:</strong><br />
+                      <span class="tok-syn">Crestline Bio LLC</span> shall remit the <span class="tok-syn">$576,000</span> fee on or before <span class="tok-syn">April 24, 2026</span>, subject to written sign-off by <span class="tok-syn">Dr. Hannah Brooks</span>. Any undisputed balance unpaid after 30 calendar days shall bear interest capped under Massachusetts law (M.G.L. c. 231, § 6C).
+                    </div>
+                    <div class="output-box-footer">Generated by Claude using zero real client data</div>
+                  </div>
+
+                  <div class="restore-action-col">
+                    <button type="button" class="btn btn-green btn-sm" id="docx-restore-btn">Restore Real Values</button>
+                    <span class="restore-meta" id="docx-restore-meta">1-click local remap</span>
+                  </div>
+
+                  <div class="output-box restored-box" id="docx-restored-box">
+                    <div class="output-box-header">
+                      <span>Restored Redline (Ready for Client)</span>
+                      <span id="docx-restored-state">RESTORED</span>
+                    </div>
+                    <div class="output-box-body" id="docx-restored-body">
+                      <strong>Proposed Clause 4.2 Revision:</strong><br />
+                      <span class="tok-real">Apex Medical LLC</span> shall remit the <span class="tok-real">$480,000</span> fee on or before <span class="tok-real">March 15, 2026</span>, subject to written sign-off by <span class="tok-real">Dr. Sarah Jenkins</span>. Any undisputed balance unpaid after 30 calendar days shall bear interest capped under Massachusetts law (M.G.L. c. 231, § 6C).
+                    </div>
+                    <div class="output-box-footer">Entities, dates (-40d) &amp; amounts (÷1.20) restored locally — ready to send to client</div>
+                  </div>
+                </div>
+
+                <div class="demo-step-nav">
+                  <span class="demo-step-hint">Click "Restore Real Values" to toggle synthetic vs. client-ready redline.</span>
+                  <a href="#founding" class="btn btn-primary btn-sm">Reserve Founding Spot ($39) →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. WHY NAIVE [NAME_1] REDACTION BREAKS LLM ANALYSIS -->
+    <section id="why-naive-fails">
+      <div class="container">
+        <div class="section-eyebrow">Structural Integrity vs. Black-Box Redaction</div>
+        <h2 class="section-title">Why naive <code>[NAME_1]</code> redaction breaks LLM analysis</h2>
+        <p class="section-subtitle">Find-and-replace placeholders destroy spreadsheet logic, corrupt document cross-references, and force manual re-typing of every LLM answer.</p>
+
+        <div class="cards-3">
+          <div class="card">
+            <span class="card-index">01 / FORMULA INTEGRITY</span>
+            <h3>Excel formulas survive</h3>
+            <p>Replacing numbers with <code>[AMOUNT_1]</code> turns every dependent cell into <code>#VALUE!</code>. LocalTwin scales monetary columns by a secret constant factor and shifts dates uniformly — preserving every margin, variance, and <code>SUMIFS</code> formula.</p>
+            <div class="card-code">€142,500 × 1.20 → €171,000 · Margin stays 24.0%</div>
+          </div>
+
+          <div class="card">
+            <span class="card-index">02 / STRUCTURAL VALIDITY</span>
+            <h3>Valid banking &amp; cross-sheet IDs</h3>
+            <p>LLMs hallucinate when invoices lose referential links. LocalTwin generates checksum-valid MOD-97 IBANs and deterministic IDs so <code>Invoices</code>, <code>Bank</code>, and 18-page contract exhibits stay identically linked.</p>
+            <div class="card-code">INV-2026-0412 → INV-2026-8831 (all tabs synced)</div>
+          </div>
+
+          <div class="card">
+            <span class="card-index">03 / DETERMINISTIC REVERSAL</span>
+            <h3>Human-in-the-loop review + 1-click restore</h3>
+            <p>Inspect every detected entity before export, keep governing law or statutory clauses intact, and paste Claude's output back to automatically rescale figures and restore real client names in 1 click.</p>
+            <div class="card-code">€24,000 ÷ 1.20 → €20,000 · Restored locally</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. COMPARISON TABLE -->
+    <section id="comparison" class="section-subtle">
+      <div class="container">
+        <div class="section-eyebrow">Architecture Comparison</div>
+        <h2 class="section-title">Why not just pay for Claude Team, AWS Bedrock, or Copilot?</h2>
+        <p class="section-subtitle">Cloud enterprise tiers rely on legal promises after your client's file has already crossed the wire. LocalTwin keeps raw client data off the network altogether.</p>
+
+        <div class="comp-wrap">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Criterion</th>
+                <th>Claude Team / Enterprise</th>
+                <th>AWS Bedrock</th>
+                <th>Microsoft Copilot</th>
+                <th class="col-localtwin">LocalTwin (Offline)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-criterion">Raw data leaves your laptop?</td>
+                <td><span class="comp-bad">Yes</span> — uploaded to vendor servers over HTTPS.</td>
+                <td><span class="comp-bad">Yes</span> — sent to AWS cloud endpoints.</td>
+                <td><span class="comp-bad">Yes</span> — indexed &amp; processed in Microsoft 365 cloud.</td>
+                <td class="col-localtwin"><span class="comp-good">Never</span> — 0 bytes of raw data leave your machine.</td>
+              </tr>
+              <tr>
+                <td class="col-criterion">Safe under strict NDA / client "No-AI" clause?</td>
+                <td><span class="comp-warn">Grey area</span> — violates strict "no third-party AI upload" terms.</td>
+                <td><span class="comp-warn">Requires client sign-off</span> on AWS sub-processor &amp; BAA/DPA.</td>
+                <td><span class="comp-bad">No</span> — client files enter M365 AI processing scope.</td>
+                <td class="col-localtwin"><span class="comp-good">Yes</span> — LLMs only ever see synthetic, non-identifying math &amp; names.</td>
+              </tr>
+              <tr>
+                <td class="col-criterion">Cost &amp; setup</td>
+                <td>$25–$60+/seat/mo (min seat counts for Team/Enterprise).</td>
+                <td>IAM, VPC, API wiring, custom UI &amp; ongoing cloud ops.</td>
+                <td>$30/user/mo on top of M365 Enterprise licensing.</td>
+                <td class="col-localtwin"><span class="comp-good">$39 one-time</span> Founding license. 2-minute desktop install.</td>
+              </tr>
+              <tr>
+                <td class="col-criterion">Verifiable audit trail for clients</td>
+                <td>Vendor SOC2 PDF &amp; privacy policy link.</td>
+                <td>CloudTrail logs (still proves raw data hit AWS).</td>
+                <td>Purview admin logs (raw data still in cloud).</td>
+                <td class="col-localtwin"><span class="comp-good">Local diff + Airplane Mode</span> — provable 0 outbound packets.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <blockquote class="quote-callout">
+          "Zero-training promises are a policy. Keeping raw client data on your own disk is math."
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- 5. ZERO-NETWORK PROOF -->
+    <section id="zero-network" class="section-dark">
+      <div class="container">
+        <div class="section-eyebrow">Cryptographic &amp; Network Guarantees</div>
+        <h2 class="section-title">Zero-Network Proof</h2>
+        <p class="section-subtitle">Don't trust a privacy policy. Verify the binary yourself in 30 seconds.</p>
+
+        <div class="cards-3">
+          <div class="card">
+            <span class="card-index">GUARANTEE 01</span>
+            <h3>Turn off Wi-Fi before opening a file</h3>
+            <p>LocalTwin executes 100% locally on your CPU. Zero network calls, no cloud accounts, no license phone-home on launch, and zero telemetry. It runs identically in Airplane Mode.</p>
+          </div>
+
+          <div class="card">
+            <span class="card-index">GUARANTEE 02</span>
+            <h3>Ephemeral local vault</h3>
+            <p>Your entity map and scaling factor live exclusively in an encrypted local session vault on your disk. Close the matter and purge the mapping file permanently in 1 click.</p>
+          </div>
+
+          <div class="card">
+            <span class="card-index">GUARANTEE 03</span>
+            <h3>Verifiable via Little Snitch / Firewall</h3>
+            <p>Block LocalTwin completely in Little Snitch, LuLu, or Windows Defender Firewall. Every detection, synthesis, and restore operation continues working without a single blocked socket alert.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FOUNDING BATCH + 2-STEP FORM -->
+    <section id="founding" class="section-subtle">
+      <div class="container">
+        <div class="section-eyebrow">Founding Batch · Limited Early Access</div>
+        <h2 class="section-title">Lock a Founding License before public v1 launch</h2>
+        <p class="section-subtitle">We are onboarding 5 founding practitioners first to tailor v1 parsing around real-world Excel models, legal contracts, and CPA workpapers.</p>
+
+        <div class="founding-grid">
+          <!-- Left Offer Card -->
+          <div class="offer-card">
+            <div class="spots-badge">● 5 of 5 founding spots left</div>
+            <h3 class="offer-title">Founding License — $39 one-time</h3>
+            <p class="offer-strike">Regular after launch: $29/month</p>
+
+            <ul class="offer-list">
+              <li>
+                <span class="check-mark">[✓]</span>
+                <span><strong>Lifetime v1 desktop license</strong> for macOS (Apple Silicon &amp; Intel) and Windows — no recurring subscription.</span>
+              </li>
+              <li>
+                <span class="check-mark">[✓]</span>
+                <span><strong>Priority template support in v1:</strong> send us one anonymized structure of your Excel workbook or contract format and we will verify 100% compatibility before delivery.</span>
+              </li>
+              <li>
+                <span class="check-mark">[✓]</span>
+                <span><strong>100% 14-day money-back guarantee:</strong> if LocalTwin fails your own Airplane Mode test or breaks your spreadsheet formulas, full refund — no questions asked.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Right 2-Step Form Card -->
+          <div class="form-card">
+            <!-- STEP 1 -->
+            <div id="form-step-1">
+              <div class="form-step-tag">Step 1 of 2 · Reserve Spot</div>
+              <h3>Reserve your $39 Founding License</h3>
+
+              <div class="form-error" id="step1-error" role="alert"></div>
+
+              <form id="lead-form" novalidate>
+                <div class="field-group">
+                  <span class="field-label">Primary file type <span class="required-star">*</span></span>
+                  <div class="radio-stack">
+                    <label class="radio-option">
+                      <input type="radio" name="selected_format" value="excel_csv" required />
+                      <span>Financial Excel / CSV</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="selected_format" value="docx_pdf" required />
+                      <span>Legal / CPA DOCX &amp; PDF</span>
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="selected_format" value="both" required />
+                      <span>Both</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="work-email">Work email <span class="required-star">*</span></label>
+                  <input type="email" id="work-email" name="email" class="text-input" placeholder="you@firm.com" required autocomplete="email" />
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="pain-note">What breaks when you try to anonymize today? <span style="font-weight:400; color: var(--graphite-500);">(optional)</span></label>
+                  <input type="text" id="pain-note" name="pain_note" class="text-input" placeholder="e.g. XLOOKUPs break, IBAN formats fail, manual find/replace takes 40 min..." maxlength="240" />
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Reserve Founding Spot ($39)</button>
+                <p class="form-note">No charge on this step. Choose Instant Crypto Lock or Card / Business Invoice on Step 2.</p>
+              </form>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="form-step-2" class="hidden">
+              <div class="form-step-tag">Step 2 of 2 · Payment Lock</div>
+              <h3>Spot Reserved — Complete Founding Lock ($39)</h3>
+
+              <div class="reserved-summary" id="reserved-summary"></div>
+
+              <!-- Option 1: Crypto -->
+              <div class="payment-option">
+                <h4>Option 1: Instant Lock — USDC / USDT ($39)</h4>
+                <p>Send $39 USDC or USDT to lock your Founding seat immediately, then paste your transaction hash below.</p>
+
+                <div class="wallet-row">
+                  <span class="wallet-label">USDC (Base / Arbitrum — EVM)</span>
+                  <div class="wallet-copy-box">
+                    <div class="wallet-addr" id="wallet-evm-display"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" data-copy-target="wallet-evm-display">Copy</button>
+                  </div>
+                </div>
+
+                <div class="wallet-row">
+                  <span class="wallet-label">USDT (TRC-20)</span>
+                  <div class="wallet-copy-box">
+                    <div class="wallet-addr" id="wallet-trc20-display"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" data-copy-target="wallet-trc20-display">Copy</button>
+                  </div>
+                </div>
+
+                <div class="tx-row">
+                  <input type="text" id="tx-hash-input" class="text-input" placeholder="Paste tx hash" aria-label="Paste transaction hash" />
+                  <button type="button" class="btn btn-primary btn-sm" id="confirm-crypto-btn" style="white-space: nowrap;">Confirm Crypto Payment</button>
+                </div>
+                <div class="form-error" id="crypto-error" role="alert" style="margin-top: 10px; margin-bottom: 0;"></div>
+                <div class="status-box" id="crypto-status"></div>
+              </div>
+
+              <!-- Option 2: Card / Invoice -->
+              <div class="payment-option">
+                <h4>Option 2: Card / Business Invoice — Zero-Crypto</h4>
+                <p>Prefer a standard corporate invoice or card checkout link for expense reimbursement? Lock your $39 rate now.</p>
+                <button type="button" class="btn btn-secondary" id="invoice-intent-btn" style="width: 100%;">I prefer Card / Invoice ($39) — lock my founding price</button>
+                <div class="status-box" id="invoice-status"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span>LocalTwin · 100% Offline Desktop Synthetic Data Utility</span>
+      <span>Zero cloud uploads · Zero telemetry · Airplane Mode verified</span>
+    </div>
+  </footer>
+
+  <script>
+    const CONFIG = {
+      APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw-wB1g5kjfKli3IojNswCOIDSao1orW7ONsAi_lBDNm-uV5-cZUJH5yJ34iy5jSKDI/exec",
+      CRYPTO_WALLET_EVM: "REPLACE_WITH_YOUR_USDC_BASE_OR_ARBITRUM_ADDRESS",
+      CRYPTO_WALLET_TRC20: "REPLACE_WITH_YOUR_USDT_TRC20_ADDRESS"
+    };
+
+    (function () {
+      "use strict";
+
+      // --- UTM & State ---
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmSource = (urlParams.get("utm_source") || "direct").trim();
+
+      const state = {
+        activeTab: "excel",
+        email: "",
+        selectedFormat: "",
+        painNote: "",
+        excelRestored: true,
+        docxRestored: true,
+        firedStep3: { excel: false, docx: false }
+      };
+
+      // --- Silent Background Event Tracking ---
+      function trackEvent(eventType, extra) {
+        const payload = {
+          timestamp: new Date().toISOString(),
+          event_type: eventType,
+          utm_source: utmSource,
+          selected_format: (extra && extra.selected_format) || state.selectedFormat || "",
+          email: (extra && extra.email) || state.email || "",
+          payment_status: (extra && extra.payment_status) || "",
+          tx_hash_or_note: (extra && extra.tx_hash_or_note) || ""
+        };
+
+        if (!CONFIG.APPS_SCRIPT_URL || CONFIG.APPS_SCRIPT_URL.indexOf("REPLACE_WITH") !== -1) {
+          console.log("[LocalTwin Analytics - Local Debug]", payload);
+          return;
+        }
+
+        try {
+          fetch(CONFIG.APPS_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+              "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payload)
+          }).catch(function () {
+            // Silent failure in background tracking
+          });
+        } catch (err) {
+          // Never interrupt user experience
+        }
+      }
+
+      // --- Wallet Address Population ---
+      const evmEl = document.getElementById("wallet-evm-display");
+      const trcEl = document.getElementById("wallet-trc20-display");
+      if (evmEl) evmEl.textContent = CONFIG.CRYPTO_WALLET_EVM;
+      if (trcEl) trcEl.textContent = CONFIG.CRYPTO_WALLET_TRC20;
+
+      // --- Demo Tab Switching ---
+      const tabButtons = document.querySelectorAll(".demo-tab-btn");
+      const tabPanels = document.querySelectorAll("[data-tab-panel]");
+
+      function switchTab(tabName) {
+        state.activeTab = tabName;
+        tabButtons.forEach(function (btn) {
+          const isActive = btn.getAttribute("data-tab") === tabName;
+          btn.classList.toggle("active", isActive);
+          btn.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+        tabPanels.forEach(function (panel) {
+          const isMatch = panel.getAttribute("data-tab-panel") === tabName;
+          panel.classList.toggle("hidden", !isMatch);
+        });
+
+        trackEvent(tabName === "excel" ? "tab_excel" : "tab_docx", {
+          selected_format: tabName === "excel" ? "excel_csv" : "docx_pdf"
+        });
+      }
+
+      tabButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const target = btn.getAttribute("data-tab");
+          if (target) switchTab(target);
+        });
+      });
+
+      document.querySelectorAll("[data-switch-tab]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const target = btn.getAttribute("data-switch-tab");
+          if (target) {
+            switchTab(target);
+            setStep(target, "1");
+          }
+        });
+      });
+
+      // --- Demo Step Switching ---
+      function setStep(demoName, stepNum) {
+        const stepBtns = document.querySelectorAll('.step-btn[data-demo="' + demoName + '"]');
+        const stepPanels = document.querySelectorAll('.demo-panel[data-demo-panel="' + demoName + '"]');
+
+        stepBtns.forEach(function (b) {
+          b.classList.toggle("active", b.getAttribute("data-step") === String(stepNum));
+        });
+        stepPanels.forEach(function (p) {
+          p.classList.toggle("active", p.getAttribute("data-step-panel") === String(stepNum));
+        });
+
+        if (demoName === "docx" && String(stepNum) === "2") {
+          renderDocxStep2();
+        }
+
+        if (String(stepNum) === "3" && !state.firedStep3[demoName]) {
+          state.firedStep3[demoName] = true;
+          trackEvent("demo_step_3", {
+            selected_format: demoName === "excel" ? "excel_csv" : "docx_pdf",
+            tx_hash_or_note: "demo_step_3:" + demoName
+          });
+        }
+      }
+
+      document.querySelectorAll(".step-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setStep(btn.getAttribute("data-demo"), btn.getAttribute("data-step"));
+        });
+      });
+
+      document.querySelectorAll("[data-goto-demo]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setStep(btn.getAttribute("data-goto-demo"), btn.getAttribute("data-goto-step"));
+        });
+      });
+
+      // --- Human-in-the-loop Checkboxes (DOCX Step 1 -> Step 2 live reflection) ---
+      function renderDocxStep2() {
+        const container = document.getElementById("docx-step2-text");
+        if (!container) return;
+
+        const orgChecked = document.getElementById("chk-org").checked;
+        const personChecked = document.getElementById("chk-person").checked;
+        const amountChecked = document.getElementById("chk-amount").checked;
+        const dateChecked = document.getElementById("chk-date").checked;
+        const cityChecked = document.getElementById("chk-city").checked;
+
+        const orgHtml = orgChecked
+          ? '<span class="tok-real">Crestline Bio LLC</span>'
+          : '<span class="tok-raw">Apex Medical LLC</span>';
+        const personHtml = personChecked
+          ? '<span class="tok-real">Dr. Hannah Brooks</span>'
+          : '<span class="tok-raw">Dr. Sarah Jenkins</span>';
+        const amountHtml = amountChecked
+          ? '<span class="tok-real">$576,000</span>'
+          : '<span class="tok-raw">$480,000</span>';
+        const dateHtml = dateChecked
+          ? '<span class="tok-real">April 24, 2026</span>'
+          : '<span class="tok-raw">March 15, 2026</span>';
+        const cityHtml = cityChecked
+          ? '<span class="tok-real">Denver, CO</span>'
+          : '<span class="tok-raw">Boston, MA</span>';
+
+        container.innerHTML =
+          "<strong>4.2 Payment &amp; Venue.</strong> " +
+          orgHtml +
+          " ('Client'), represented by " +
+          personHtml +
+          ", agrees to pay " +
+          amountHtml +
+          " by " +
+          dateHtml +
+          ', governed by <span class="tok-keep">Massachusetts law</span> (' +
+          cityHtml +
+          "), with late balances accruing statutory interest after 15 business days.";
+      }
+
+      document.querySelectorAll("[data-entity-key]").forEach(function (chk) {
+        chk.addEventListener("change", renderDocxStep2);
+      });
+
+      // --- Step 3 Interactive Restore Buttons ---
+      const excelRestoreBtn = document.getElementById("excel-restore-btn");
+      const excelRestoredBody = document.getElementById("excel-restored-body");
+      const excelRestoredBox = document.getElementById("excel-restored-box");
+      const excelRestoredState = document.getElementById("excel-restored-state");
+      const excelRestoreMeta = document.getElementById("excel-restore-meta");
+
+      const EXCEL_REAL_HTML =
+        '<strong>Reconciliation Finding:</strong><br />' +
+        '<span class="tok-real">Acme Holdings GmbH</span> (<span class="tok-real">INV-2026-0412</span>) shows a <span class="tok-real">€20,000</span> variance between the booked invoice (<span class="tok-real">€142,500.00</span>) and the settled bank wire on IBAN <span class="tok-real">DE89 3704 0044 0532 0130 00</span>. Gross margin remains steady at 24.0%; recommend requesting remittance advice for the unpaid tranche.';
+
+      const EXCEL_SYN_HTML =
+        '<strong>Reconciliation Finding (Pre-Restore):</strong><br />' +
+        '<span class="tok-syn">Nordic Craft GmbH</span> (<span class="tok-syn">INV-2026-8831</span>) shows a <span class="tok-syn">€24,000</span> variance between the booked invoice (<span class="tok-syn">€171,000.00</span>) and the settled bank wire on IBAN <span class="tok-syn">DE44 5001 0517 5407 3249 31</span>. Gross margin remains steady at 24.0%; recommend requesting remittance advice for the unpaid tranche.';
+
+      if (excelRestoreBtn) {
+        excelRestoreBtn.addEventListener("click", function () {
+          state.excelRestored = !state.excelRestored;
+          if (state.excelRestored) {
+            excelRestoredBody.innerHTML = EXCEL_REAL_HTML;
+            excelRestoredBox.classList.add("restored-box");
+            excelRestoredState.textContent = "RESTORED";
+            excelRestoreMeta.textContent = "Restored locally (0.3 ms)";
+          } else {
+            excelRestoredBody.innerHTML = EXCEL_SYN_HTML;
+            excelRestoredBox.classList.remove("restored-box");
+            excelRestoredState.textContent = "SYNTHETIC";
+            excelRestoreMeta.textContent = "Click to restore values";
+          }
+          if (!state.firedStep3.excel) {
+            state.firedStep3.excel = true;
+            trackEvent("demo_step_3", {
+              selected_format: "excel_csv",
+              tx_hash_or_note: "restore_click:excel"
+            });
+          }
+        });
+      }
+
+      const docxRestoreBtn = document.getElementById("docx-restore-btn");
+      const docxRestoredBody = document.getElementById("docx-restored-body");
+      const docxRestoredBox = document.getElementById("docx-restored-box");
+      const docxRestoredState = document.getElementById("docx-restored-state");
+      const docxRestoreMeta = document.getElementById("docx-restore-meta");
+
+      const DOCX_REAL_HTML =
+        '<strong>Proposed Clause 4.2 Revision:</strong><br />' +
+        '<span class="tok-real">Apex Medical LLC</span> shall remit the <span class="tok-real">$480,000</span> fee on or before <span class="tok-real">March 15, 2026</span>, subject to written sign-off by <span class="tok-real">Dr. Sarah Jenkins</span>. Any undisputed balance unpaid after 30 calendar days shall bear interest capped under Massachusetts law (M.G.L. c. 231, § 6C).';
+
+      const DOCX_SYN_HTML =
+        '<strong>Proposed Clause 4.2 Revision (Pre-Restore):</strong><br />' +
+        '<span class="tok-syn">Crestline Bio LLC</span> shall remit the <span class="tok-syn">$576,000</span> fee on or before <span class="tok-syn">April 24, 2026</span>, subject to written sign-off by <span class="tok-syn">Dr. Hannah Brooks</span>. Any undisputed balance unpaid after 30 calendar days shall bear interest capped under Massachusetts law (M.G.L. c. 231, § 6C).';
+
+      if (docxRestoreBtn) {
+        docxRestoreBtn.addEventListener("click", function () {
+          state.docxRestored = !state.docxRestored;
+          if (state.docxRestored) {
+            docxRestoredBody.innerHTML = DOCX_REAL_HTML;
+            docxRestoredBox.classList.add("restored-box");
+            docxRestoredState.textContent = "RESTORED";
+            docxRestoreMeta.textContent = "Restored locally (0.2 ms)";
+          } else {
+            docxRestoredBody.innerHTML = DOCX_SYN_HTML;
+            docxRestoredBox.classList.remove("restored-box");
+            docxRestoredState.textContent = "SYNTHETIC";
+            docxRestoreMeta.textContent = "Click to restore values";
+          }
+          if (!state.firedStep3.docx) {
+            state.firedStep3.docx = true;
+            trackEvent("demo_step_3", {
+              selected_format: "docx_pdf",
+              tx_hash_or_note: "restore_click:docx"
+            });
+          }
+        });
+      }
+
+      // --- 2-Step Founding Form ---
+      const leadForm = document.getElementById("lead-form");
+      const step1Box = document.getElementById("form-step-1");
+      const step2Box = document.getElementById("form-step-2");
+      const step1Error = document.getElementById("step1-error");
+      const reservedSummary = document.getElementById("reserved-summary");
+
+      function showError(el, msg) {
+        el.textContent = msg;
+        el.classList.add("visible");
+      }
+
+      function clearError(el) {
+        el.textContent = "";
+        el.classList.remove("visible");
+      }
+
+      if (leadForm) {
+        leadForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          clearError(step1Error);
+
+          const checkedRadio = leadForm.querySelector('input[name="selected_format"]:checked');
+          const emailInput = document.getElementById("work-email");
+          const painInput = document.getElementById("pain-note");
+
+          const selectedFormat = checkedRadio ? checkedRadio.value : "";
+          const email = emailInput ? emailInput.value.trim() : "";
+          const painNote = painInput ? painInput.value.trim() : "";
+
+          if (!selectedFormat) {
+            showError(step1Error, "Please select your primary file type.");
+            return;
+          }
+
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!email || !emailPattern.test(email)) {
+            showError(step1Error, "Please enter a valid work email address.");
+            return;
+          }
+
+          state.selectedFormat = selectedFormat;
+          state.email = email;
+          state.painNote = painNote;
+
+          trackEvent("lead_submit", {
+            selected_format: selectedFormat,
+            email: email,
+            payment_status: "spot_reserved",
+            tx_hash_or_note: painNote
+          });
+
+          const formatLabels = {
+            excel_csv: "Financial Excel / CSV",
+            docx_pdf: "Legal / CPA DOCX & PDF",
+            both: "Both (Excel/CSV + DOCX/PDF)"
+          };
+
+          reservedSummary.textContent =
+            "Reserved for: " + email + " · Format: " + (formatLabels[selectedFormat] || selectedFormat);
+
+          step1Box.classList.add("hidden");
+          step2Box.classList.remove("hidden");
+        });
+      }
+
+      // --- Copy Wallet Buttons ---
+      document.querySelectorAll("[data-copy-target]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const targetId = btn.getAttribute("data-copy-target");
+          const targetEl = document.getElementById(targetId);
+          if (!targetEl) return;
+          const textToCopy = targetEl.textContent.trim();
+
+          function markCopied() {
+            const orig = btn.textContent;
+            btn.textContent = "Copied";
+            setTimeout(function () {
+              btn.textContent = orig;
+            }, 1600);
+          }
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(markCopied).catch(function () {
+              fallbackCopy(textToCopy, markCopied);
+            });
+          } else {
+            fallbackCopy(textToCopy, markCopied);
+          }
+        });
+      });
+
+      function fallbackCopy(text, onDone) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          onDone();
+        } catch (err) {
+          // Ignore clipboard errors
+        }
+        document.body.removeChild(ta);
+      }
+
+      // --- Step 2 Option 1: Crypto TX Confirmation ---
+      const confirmCryptoBtn = document.getElementById("confirm-crypto-btn");
+      const txHashInput = document.getElementById("tx-hash-input");
+      const cryptoError = document.getElementById("crypto-error");
+      const cryptoStatus = document.getElementById("crypto-status");
+
+      if (confirmCryptoBtn) {
+        confirmCryptoBtn.addEventListener("click", function () {
+          clearError(cryptoError);
+          const txHash = txHashInput ? txHashInput.value.trim() : "";
+          if (!txHash || txHash.length < 8) {
+            showError(cryptoError, "Please paste a valid transaction hash before confirming.");
+            return;
+          }
+
+          trackEvent("crypto_tx", {
+            selected_format: state.selectedFormat,
+            email: state.email,
+            payment_status: "crypto_tx_submitted",
+            tx_hash_or_note: txHash
+          });
+
+          cryptoStatus.textContent =
+            "Transaction hash recorded (" +
+            txHash.slice(0, 18) +
+            (txHash.length > 18 ? "..." : "") +
+            "). We will verify on-chain and email your Founding confirmation to " +
+            state.email +
+            ".";
+          cryptoStatus.classList.add("visible");
+          confirmCryptoBtn.disabled = true;
+          confirmCryptoBtn.textContent = "Submitted";
+        });
+      }
+
+      // --- Step 2 Option 2: Card / Invoice Intent ---
+      const invoiceBtn = document.getElementById("invoice-intent-btn");
+      const invoiceStatus = document.getElementById("invoice-status");
+
+      if (invoiceBtn) {
+        invoiceBtn.addEventListener("click", function () {
+          trackEvent("invoice_intent", {
+            selected_format: state.selectedFormat,
+            email: state.email,
+            payment_status: "invoice_requested",
+            tx_hash_or_note: "Card / Business Invoice ($39) requested"
+          });
+
+          invoiceStatus.textContent =
+            "Founding price ($39) locked. We will send a Card / Business Invoice link directly to " +
+            state.email +
+            " within 24 hours.";
+          invoiceStatus.classList.add("visible");
+          invoiceBtn.disabled = true;
+          invoiceBtn.textContent = "Invoice Request Recorded";
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
